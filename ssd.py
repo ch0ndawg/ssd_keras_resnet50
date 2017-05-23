@@ -116,7 +116,7 @@ def SSD300(input_shape, num_classes=21):
     # Determine proper input shape
     # this code is TensorFlow/Theano agnostic,
     # though some of the other parts of this are not
-    
+
     if K.image_dim_ordering() == 'th':
         input_shape = (3, 300, 300)
     else:
@@ -201,8 +201,8 @@ def SSD300(input_shape, num_classes=21):
                                    name='conv8_2')(net['conv8_1'])
     # Last Pool
     net['pool6'] = GlobalAveragePooling2D(name='pool6')(net['conv8_2'])
-    # Prediction from conv4_3
-    net['conv4_3_norm'] = Normalize(20, name='conv4_3_norm')(net['conv4_3'])
+    # Prediction from conv4_6 (still called conv4_3 in the remainder)
+    net['conv4_3_norm'] = Normalize(20, name='conv4_3_norm')(net['conv4_6'])
     num_priors = 3
     x = Convolution2D(num_priors * 4, 3, 3, border_mode='same',
                       name='conv4_3_norm_mbox_loc')(net['conv4_3_norm'])

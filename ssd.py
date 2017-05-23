@@ -119,72 +119,124 @@ def SSD300(input_shape, num_classes=21):
     input_tensor = input_tensor = Input(shape=input_shape)
     img_size = (input_shape[1], input_shape[0])
     net['input'] = input_tensor
-    net['conv1_1'] = Convolution2D(64, 3, 3,
-                                   activation='relu',
-                                   border_mode='same',
-                                   name='conv1_1')(net['input'])
-    net['conv1_2'] = Convolution2D(64, 3, 3,
-                                   activation='relu',
-                                   border_mode='same',
-                                   name='conv1_2')(net['conv1_1'])
-    net['pool1'] = MaxPooling2D((2, 2), strides=(2, 2), border_mode='same',
-                                name='pool1')(net['conv1_2'])
+
+####################################################################################
+## ResNet50 architecture (adapted from )
+    if K.image_data_format() == 'channels_last':
+        bn_axis = 3
+    else:
+        bn_axis = 1
+
+    # Block 1
+    x = ZeroPadding2D((3, 3))(net['input'])
+    net['conv1'] = Convolution2D(64, 7, 7,
+                                 activation='relu',
+                                 border_mode='valid',
+                                 name='conv1')(x)
+    net['bn_conv1'] = BatchNormalization(axis=bn_axis, name='bn_conv1')(net['conv1'])
+    x = Activation('relu')(net['bn_conv1'])
+
+    net['pool1'] = MaxPooling2D((3, 3), strides=(2, 2))(x)
+
     # Block 2
-    net['conv2_1'] = Convolution2D(128, 3, 3,
-                                   activation='relu',
-                                   border_mode='same',
-                                   name='conv2_1')(net['pool1'])
-    net['conv2_2'] = Convolution2D(128, 3, 3,
-                                   activation='relu',
-                                   border_mode='same',
-                                   name='conv2_2')(net['conv2_1'])
-    net['pool2'] = MaxPooling2D((2, 2), strides=(2, 2), border_mode='same',
-                                name='pool2')(net['conv2_2'])
+    x = conv_block(x, 3, [64, 64, 256], stage=2, block='a', strides=(1, 1))
+    x = identity_block(x, 3, [64, 64, 256], stage=2, block='b')
+    x = identity_block(x, 3, [64, 64, 256], stage=2, block='c')
+
     # Block 3
-    net['conv3_1'] = Convolution2D(256, 3, 3,
-                                   activation='relu',
-                                   border_mode='same',
-                                   name='conv3_1')(net['pool2'])
-    net['conv3_2'] = Convolution2D(256, 3, 3,
-                                   activation='relu',
-                                   border_mode='same',
-                                   name='conv3_2')(net['conv3_1'])
-    net['conv3_3'] = Convolution2D(256, 3, 3,
-                                   activation='relu',
-                                   border_mode='same',
-                                   name='conv3_3')(net['conv3_2'])
-    net['pool3'] = MaxPooling2D((2, 2), strides=(2, 2), border_mode='same',
-                                name='pool3')(net['conv3_3'])
+    x = conv_block(x, 3, [128, 128, 512], stage=3, block='a')
+    x = identity_block(x, 3, [128, 128, 512], stage=3, block='b')
+    x = identity_block(x, 3, [128, 128, 512], stage=3, block='c')
+    x = identity_block(x, 3, [128, 128, 512], stage=3, block='d')
+
     # Block 4
-    net['conv4_1'] = Convolution2D(512, 3, 3,
-                                   activation='relu',
-                                   border_mode='same',
-                                   name='conv4_1')(net['pool3'])
-    net['conv4_2'] = Convolution2D(512, 3, 3,
-                                   activation='relu',
-                                   border_mode='same',
-                                   name='conv4_2')(net['conv4_1'])
-    net['conv4_3'] = Convolution2D(512, 3, 3,
-                                   activation='relu',
-                                   border_mode='same',
-                                   name='conv4_3')(net['conv4_2'])
-    net['pool4'] = MaxPooling2D((2, 2), strides=(2, 2), border_mode='same',
-                                name='pool4')(net['conv4_3'])
+    x = conv_block(x, 3, [256, 256, 1024], stage=4, block='a')
+    x = identity_block(x, 3, [256, 256, 1024], stage=4, block='b')
+    x = identity_block(x, 3, [256, 256, 1024], stage=4, block='c')
+    x = identity_block(x, 3, [256, 256, 1024], stage=4, block='d')
+    x = identity_block(x, 3, [256, 256, 1024], stage=4, block='e')
+    x = identity_block(x, 3, [256, 256, 1024], stage=4, block='f')
+
     # Block 5
-    net['conv5_1'] = Convolution2D(512, 3, 3,
-                                   activation='relu',
-                                   border_mode='same',
-                                   name='conv5_1')(net['pool4'])
-    net['conv5_2'] = Convolution2D(512, 3, 3,
-                                   activation='relu',
-                                   border_mode='same',
-                                   name='conv5_2')(net['conv5_1'])
-    net['conv5_3'] = Convolution2D(512, 3, 3,
-                                   activation='relu',
-                                   border_mode='same',
-                                   name='conv5_3')(net['conv5_2'])
-    net['pool5'] = MaxPooling2D((3, 3), strides=(1, 1), border_mode='same',
-                                name='pool5')(net['conv5_3'])
+    x = conv_block(x, 3, [512, 512, 2048], stage=5, block='a')
+    x = identity_block(x, 3, [512, 512, 2048], stage=5, block='b')
+    x = identity_block(x, 3, [512, 512, 2048], stage=5, block='c')
+
+    x = AveragePooling2D((7, 7), name='avg_pool')(x)
+    x = GlobalMaxPooling2D()(x)
+
+## END ResNet50
+####################################################################################
+## OLD VGG-16 architecture
+    # net['conv1_1'] = Convolution2D(64, 3, 3,
+    #                                activation='relu',
+    #                                border_mode='same',
+    #                                name='conv1_1')(net['input'])
+    # net['conv1_2'] = Convolution2D(64, 3, 3,
+    #                                activation='relu',
+    #                                border_mode='same',
+    #                                name='conv1_2')(net['conv1_1'])
+    # net['pool1'] = MaxPooling2D((2, 2), strides=(2, 2), border_mode='same',
+    #                             name='pool1')(net['conv1_2'])
+    # # Block 2
+    # net['conv2_1'] = Convolution2D(128, 3, 3,
+    #                                activation='relu',
+    #                                border_mode='same',
+    #                                name='conv2_1')(net['pool1'])
+    # net['conv2_2'] = Convolution2D(128, 3, 3,
+    #                                activation='relu',
+    #                                border_mode='same',
+    #                                name='conv2_2')(net['conv2_1'])
+    # net['pool2'] = MaxPooling2D((2, 2), strides=(2, 2), border_mode='same',
+    #                             name='pool2')(net['conv2_2'])
+    # # Block 3
+    # net['conv3_1'] = Convolution2D(256, 3, 3,
+    #                                activation='relu',
+    #                                border_mode='same',
+    #                                name='conv3_1')(net['pool2'])
+    # net['conv3_2'] = Convolution2D(256, 3, 3,
+    #                                activation='relu',
+    #                                border_mode='same',
+    #                                name='conv3_2')(net['conv3_1'])
+    # net['conv3_3'] = Convolution2D(256, 3, 3,
+    #                                activation='relu',
+    #                                border_mode='same',
+    #                                name='conv3_3')(net['conv3_2'])
+    # net['pool3'] = MaxPooling2D((2, 2), strides=(2, 2), border_mode='same',
+    #                             name='pool3')(net['conv3_3'])
+    # # Block 4
+    # net['conv4_1'] = Convolution2D(512, 3, 3,
+    #                                activation='relu',
+    #                                border_mode='same',
+    #                                name='conv4_1')(net['pool3'])
+    # net['conv4_2'] = Convolution2D(512, 3, 3,
+    #                                activation='relu',
+    #                                border_mode='same',
+    #                                name='conv4_2')(net['conv4_1'])
+    # net['conv4_3'] = Convolution2D(512, 3, 3,
+    #                                activation='relu',
+    #                                border_mode='same',
+    #                                name='conv4_3')(net['conv4_2'])
+    # net['pool4'] = MaxPooling2D((2, 2), strides=(2, 2), border_mode='same',
+    #                             name='pool4')(net['conv4_3'])
+    # # Block 5
+    # net['conv5_1'] = Convolution2D(512, 3, 3,
+    #                                activation='relu',
+    #                                border_mode='same',
+    #                                name='conv5_1')(net['pool4'])
+    # net['conv5_2'] = Convolution2D(512, 3, 3,
+    #                                activation='relu',
+    #                                border_mode='same',
+    #                                name='conv5_2')(net['conv5_1'])
+    # net['conv5_3'] = Convolution2D(512, 3, 3,
+    #                                activation='relu',
+    #                                border_mode='same',
+    #                                name='conv5_3')(net['conv5_2'])
+    # net['pool5'] = MaxPooling2D((3, 3), strides=(1, 1), border_mode='same',
+    #                             name='pool5')(net['conv5_3'])
+#### END VGG-16
+#####################################################################################
+
     # FC6
     net['fc6'] = AtrousConvolution2D(1024, 3, 3, atrous_rate=(6, 6),
                                      activation='relu', border_mode='same',

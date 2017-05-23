@@ -107,9 +107,8 @@ def SSD300(input_shape, num_classes=21):
     """
     net = {}
     # Block 1
-    input_tensor = input_tensor = Input(shape=input_shape)
+    input_tensor = Input(shape=input_shape)
     img_size = (input_shape[1], input_shape[0])
-    net['input'] = input_tensor
 
 ####################################################################################
 ## ResNet50 architecture
@@ -122,24 +121,23 @@ def SSD300(input_shape, num_classes=21):
     else:
         input_shape = (300, 300, 3)
 
-    if input_tensor is None:
-        img_input = Input(shape=input_shape)
+    if not K.is_keras_tensor(input_tensor):
+        net['input'] = Input(tensor=input_tensor)
     else:
-        if not K.is_keras_tensor(input_tensor):
-            img_input = Input(tensor=input_tensor)
-        else:
-            img_input = input_tensor
+        net['input'] = input_tensor
     if K.image_dim_ordering() == 'tf':
         bn_axis = 3
     else:
         bn_axis = 1
 
-    x = ZeroPadding2D((3, 3))(img_input)
-    x = Convolution2D(64, 7, 7, subsample=(2, 2), name='conv1')(x)
-    x = BatchNormalization(axis=bn_axis, name='bn_conv1')(x)
+    # Block 1
+    x = ZeroPadding2D((3, 3))(net['input'])
+    net['conv1'] = Convolution2D(64, 7, 7, subsample=(2, 2), name='conv1')(x)
+    net['bn_conv1'] = BatchNormalization(axis=bn_axis, name='bn_conv1')(net['conv1'])
     x = Activation('relu')(x)
-    x = MaxPooling2D((3, 3), strides=(2, 2))(x)
+    net['pool1'] = MaxPooling2D((3, 3), strides=(2, 2))(x)
 
+    # Block 2
     x = conv_block(x, 3, [64, 64, 256], stage=2, block='a', strides=(1, 1))
     x = identity_block(x, 3, [64, 64, 256], stage=2, block='b')
     x = identity_block(x, 3, [64, 64, 256], stage=2, block='c')

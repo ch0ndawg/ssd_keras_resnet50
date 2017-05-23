@@ -85,7 +85,6 @@ class XML_preprocessor(object):
         return one_hot_vector
 
 ## example on how to use it
-# import pickle
-# data = XML_preprocessor('VOC2007/Annotations/').data
-# pickle.dump(data,open('VOC2007.p','wb'))
-
+import pickle
+data = XML_preprocessor('VOC2007/Annotations/').data
+pickle.dump(data,open('VOC2007.p','wb'))

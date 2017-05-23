@@ -157,11 +157,11 @@ def SSD300(input_shape, num_classes=21):
     net['conv4_6'] = identity_block(net['conv4_5'], 3, [256, 256, 1024], stage=4, block='6')
 
     # Block 5
-    x = conv_block(x, 3, [512, 512, 2048], stage=5, block='a')
-    x = identity_block(x, 3, [512, 512, 2048], stage=5, block='b')
-    x = identity_block(x, 3, [512, 512, 2048], stage=5, block='c')
+    net['conv5_1']  = conv_block(net['conv4_6'], 3, [512, 512, 2048], stage=5, block='1')
+    net['conv5_2'] = identity_block(net['conv5_1'], 3, [512, 512, 2048], stage=5, block='2')
+    net['conv5_3'] = identity_block(net['conv5_2'], 3, [512, 512, 2048], stage=5, block='3')
 
-    x = AveragePooling2D((7, 7), name='avg_pool')(x)
+    net['avg_pool'] = AveragePooling2D((7, 7), name='avg_pool')(net['conv5_3'])
 
     # load weights
 

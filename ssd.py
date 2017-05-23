@@ -134,7 +134,7 @@ def SSD300(input_shape, num_classes=21):
     x = ZeroPadding2D((3, 3))(net['input'])
     net['conv1'] = Convolution2D(64, 7, 7, subsample=(2, 2), name='conv1')(x)
     net['bn_conv1'] = BatchNormalization(axis=bn_axis, name='bn_conv1')(net['conv1'])
-    x = Activation('relu')(x)
+    x = Activation('relu')(net['bn_conv1'])
     net['pool1'] = MaxPooling2D((3, 3), strides=(2, 2))(x)
 
     # Block 2
@@ -156,6 +156,7 @@ def SSD300(input_shape, num_classes=21):
     net['conv4_5'] = identity_block(net['conv4_4'], 3, [256, 256, 1024], stage=4, block='5')
     net['conv4_6'] = identity_block(net['conv4_5'], 3, [256, 256, 1024], stage=4, block='6')
 
+    # Block 5
     x = conv_block(x, 3, [512, 512, 2048], stage=5, block='a')
     x = identity_block(x, 3, [512, 512, 2048], stage=5, block='b')
     x = identity_block(x, 3, [512, 512, 2048], stage=5, block='c')

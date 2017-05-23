@@ -138,9 +138,9 @@ def SSD300(input_shape, num_classes=21):
     net['pool1'] = MaxPooling2D((3, 3), strides=(2, 2))(x)
 
     # Block 2
-    x = conv_block(x, 3, [64, 64, 256], stage=2, block='a', strides=(1, 1))
-    x = identity_block(x, 3, [64, 64, 256], stage=2, block='b')
-    x = identity_block(x, 3, [64, 64, 256], stage=2, block='c')
+    net['conv2_a'] = conv_block(net['pool1'], 3, [64, 64, 256], stage=2, block='a', strides=(1, 1))
+    net['conv2_b'] = identity_block(net['conv2_a'], 3, [64, 64, 256], stage=2, block='b')
+    net['conv2_c'] = identity_block(net['conv2_b'], 3, [64, 64, 256], stage=2, block='c')
 
     x = conv_block(x, 3, [128, 128, 512], stage=3, block='a')
     x = identity_block(x, 3, [128, 128, 512], stage=3, block='b')

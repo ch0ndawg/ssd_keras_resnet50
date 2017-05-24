@@ -244,7 +244,9 @@ def SSD300(input_shape, num_classes=21):
     priorbox = PriorBox(img_size, 60.0, max_size=114.0, aspect_ratios=[2, 3],
                         variances=[0.1, 0.1, 0.2, 0.2],
                         name='fc7_mbox_priorbox')
-    net['fc7_mbox_priorbox'] = priorbox(net['fc7'])
+
+    # Old one was fc7
+    net['fc7_mbox_priorbox'] = priorbox(net['conv4_6'])
 
     # Prediction from this fc7 (it will still be called 6_2)
     # project it so that its channels are 512, as bounding box data
@@ -267,12 +269,13 @@ def SSD300(input_shape, num_classes=21):
     priorbox = PriorBox(img_size, 114.0, max_size=168.0, aspect_ratios=[2, 3],
                         variances=[0.1, 0.1, 0.2, 0.2],
                         name='conv6_2_mbox_priorbox')
-    net['conv6_2_mbox_priorbox'] = priorbox(net['conv6_2'])
+    # old conv6_2
+    net['conv6_2_mbox_priorbox'] = priorbox(net['fc7_mbox_pre'])
 
     # Prediction from conv6_2
     # (old conv7_2)
-    x = Convolution2D(256, 1, 1, activation='relu',
-                               border_mode='same', name='fc7_mbox_pre')(net['conv6_2'])
+    net['conv6_2_mbox_pre'] = Convolution2D(256, 1, 1, activation='relu',
+                               border_mode='same', name='conv6_2_mbox_pre')(net['conv6_2'])
     num_priors = 6
     x = Convolution2D(num_priors * 4, 3, 3, border_mode='same',
                       name='conv7_2_mbox_loc')(x)
@@ -290,7 +293,8 @@ def SSD300(input_shape, num_classes=21):
     priorbox = PriorBox(img_size, 168.0, max_size=222.0, aspect_ratios=[2, 3],
                         variances=[0.1, 0.1, 0.2, 0.2],
                         name='conv7_2_mbox_priorbox')
-    net['conv7_2_mbox_priorbox'] = priorbox(net['conv7_2'])
+    # old conv7_2
+    net['conv7_2_mbox_priorbox'] = priorbox(net['conv6_2_mbox_pre'])
     # Prediction from conv7_2
     # old (conv8_2)
     # no projections needed
@@ -312,7 +316,8 @@ def SSD300(input_shape, num_classes=21):
     priorbox = PriorBox(img_size, 222.0, max_size=276.0, aspect_ratios=[2, 3],
                         variances=[0.1, 0.1, 0.2, 0.2],
                         name='conv8_2_mbox_priorbox')
-    net['conv8_2_mbox_priorbox'] = priorbox(net['conv8_2'])
+
+    net['conv8_2_mbox_priorbox'] = priorbox(net['conv7_2'])
     # Prediction from pool6
     num_priors = 6
     x = Dense(num_priors * 4, name='pool6_mbox_loc_flat')(net['pool6'])

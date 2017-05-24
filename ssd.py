@@ -138,6 +138,7 @@ def SSD300(input_shape, num_classes=21):
     net['conv1'] = Convolution2D(64, 7, 7, subsample=(2, 2), name='conv1')(x)
     net['bn_conv1'] = BatchNormalization(axis=bn_axis, name='bn_conv1')(net['conv1'])
     x = Activation('relu')(net['bn_conv1'])
+    x = ZeroPadding2D((1,1))(x)
     net['pool1'] = MaxPooling2D((3, 3), strides=(2, 2))(x)
 
     # Block 2

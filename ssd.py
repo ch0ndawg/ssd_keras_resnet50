@@ -278,7 +278,7 @@ def SSD300(input_shape, num_classes=21):
                                border_mode='same', name='conv6_2_mbox_pre')(net['conv6_2'])
     num_priors = 6
     x = Convolution2D(num_priors * 4, 3, 3, border_mode='same',
-                      name='conv7_2_mbox_loc')(x)
+                      name='conv7_2_mbox_loc')(net['conv6_2_mbox_pre'])
     net['conv7_2_mbox_loc'] = x
     flatten = Flatten(name='conv7_2_mbox_loc_flat')
     net['conv7_2_mbox_loc_flat'] = flatten(net['conv7_2_mbox_loc'])

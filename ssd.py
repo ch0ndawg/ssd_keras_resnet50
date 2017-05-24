@@ -183,11 +183,11 @@ def SSD300(input_shape, num_classes=21):
     net['conv6_1'] = Convolution2D(256, 1, 1, activation='relu',
                                    border_mode='same',
                                    name='conv6_1')(net['fc7'])
-    
+
     net['conv6_2'] = ZeroPadding2D()(net['conv6_1'])
     net['conv6_2'] = Convolution2D(512, 3, 3, subsample=(2, 2),
                                    activation='relu', border_mode='valid',
-                                   name='conv6_2')(net['conv6_1'])
+                                   name='conv6_2')(net['conv6_2'])
     # Block 7
     net['conv7_1'] = Convolution2D(128, 1, 1, activation='relu',
                                    border_mode='same',
@@ -200,9 +200,10 @@ def SSD300(input_shape, num_classes=21):
     net['conv8_1'] = Convolution2D(128, 1, 1, activation='relu',
                                    border_mode='same',
                                    name='conv8_1')(net['conv7_2'])
+    net['conv8_2'] = ZeroPadding2D()(net['conv8_1'])
     net['conv8_2'] = Convolution2D(256, 3, 3, subsample=(2, 2),
-                                   activation='relu', border_mode='same',
-                                   name='conv8_2')(net['conv8_1'])
+                                   activation='relu', border_mode='valid',
+                                   name='conv8_2')(net['conv8_2'])
     # Last Pool
     net['pool6'] = GlobalAveragePooling2D(name='pool6')(net['conv8_2'])
 

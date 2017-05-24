@@ -238,14 +238,14 @@ def SSD300(input_shape, num_classes=21):
         name += '_{}'.format(num_classes)
     net['fc7_mbox_conf'] = Convolution2D(num_priors * num_classes, 3, 3,
                                          border_mode='same',
-                                         name=name)(net['fc7'])
+                                         name=name)(net['conv4_6']) # changed from fc7
     flatten = Flatten(name='fc7_mbox_conf_flat')
     net['fc7_mbox_conf_flat'] = flatten(net['fc7_mbox_conf'])
     priorbox = PriorBox(img_size, 60.0, max_size=114.0, aspect_ratios=[2, 3],
                         variances=[0.1, 0.1, 0.2, 0.2],
                         name='fc7_mbox_priorbox')
 
-    # Old one was fc7
+    # Another change from fc7
     net['fc7_mbox_priorbox'] = priorbox(net['conv4_6'])
 
     # Prediction from this fc7 (it will still be called 6_2)
@@ -262,17 +262,17 @@ def SSD300(input_shape, num_classes=21):
     if num_classes != 21:
         name += '_{}'.format(num_classes)
     x = Convolution2D(num_priors * num_classes, 3, 3, border_mode='same',
-                      name=name)(net['conv6_2'])
+                      name=name)(net['fc7_mbox_pre']) #changed from conv6_2
     net['conv6_2_mbox_conf'] = x
     flatten = Flatten(name='conv6_2_mbox_conf_flat')
     net['conv6_2_mbox_conf_flat'] = flatten(net['conv6_2_mbox_conf'])
     priorbox = PriorBox(img_size, 114.0, max_size=168.0, aspect_ratios=[2, 3],
                         variances=[0.1, 0.1, 0.2, 0.2],
                         name='conv6_2_mbox_priorbox')
-    # old conv6_2
-    net['conv6_2_mbox_priorbox'] = priorbox(net['fc7_mbox_pre'])
+    net['conv6_2_mbox_priorbox'] = priorbox(net['fc7_mbox_pre']) # changed from conv6_2
 
     # Prediction from conv6_2
+    # Project it down to 256
     # (old conv7_2)
     net['conv6_2_mbox_pre'] = Convolution2D(256, 1, 1, activation='relu',
                                border_mode='same', name='conv6_2_mbox_pre')(net['conv6_2'])
@@ -286,7 +286,7 @@ def SSD300(input_shape, num_classes=21):
     if num_classes != 21:
         name += '_{}'.format(num_classes)
     x = Convolution2D(num_priors * num_classes, 3, 3, border_mode='same',
-                      name=name)(net['conv7_2'])
+                      name=name)(net['conv6_2_mbox_pre']) #changed from conv7_2
     net['conv7_2_mbox_conf'] = x
     flatten = Flatten(name='conv7_2_mbox_conf_flat')
     net['conv7_2_mbox_conf_flat'] = flatten(net['conv7_2_mbox_conf'])
@@ -309,7 +309,7 @@ def SSD300(input_shape, num_classes=21):
     if num_classes != 21:
         name += '_{}'.format(num_classes)
     x = Convolution2D(num_priors * num_classes, 3, 3, border_mode='same',
-                      name=name)(net['conv8_2'])
+                      name=name)(net['conv7_2']) # changed from conv8_2
     net['conv8_2_mbox_conf'] = x
     flatten = Flatten(name='conv8_2_mbox_conf_flat')
     net['conv8_2_mbox_conf_flat'] = flatten(net['conv8_2_mbox_conf'])
@@ -317,7 +317,7 @@ def SSD300(input_shape, num_classes=21):
                         variances=[0.1, 0.1, 0.2, 0.2],
                         name='conv8_2_mbox_priorbox')
 
-    net['conv8_2_mbox_priorbox'] = priorbox(net['conv7_2'])
+    net['conv8_2_mbox_priorbox'] = priorbox(net['conv7_2']) #changed from conv8_2
     # Prediction from pool6
     num_priors = 6
     x = Dense(num_priors * 4, name='pool6_mbox_loc_flat')(net['pool6'])

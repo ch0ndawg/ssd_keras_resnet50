@@ -164,7 +164,7 @@ def SSD300(input_shape, num_classes=21):
     net['conv5_2'] = identity_block(net['conv5_1'], 3, [512, 512, 2048], stage=5, block='2')
     net['conv5_3'] = identity_block(net['conv5_2'], 3, [512, 512, 2048], stage=5, block='3')
 
-    net['pool5'] = AveragePooling2D((7, 7), name='pool5')(net['conv5_3'])
+    #net['pool5'] = AveragePooling2D((7, 7), name='pool5')(net['conv5_3'])
 
 
 ## END ResNet50
@@ -173,7 +173,7 @@ def SSD300(input_shape, num_classes=21):
     # FC6
     net['fc6'] = AtrousConvolution2D(1024, 3, 3, atrous_rate=(6, 6),
                                      activation='relu', border_mode='same',
-                                     name='fc6')(net['pool5'])
+                                     name='fc6')(net['conv5_3'])
     # x = Dropout(0.5, name='drop6')(x)
     # FC7
     net['fc7'] = Convolution2D(1024, 1, 1, activation='relu',
@@ -203,8 +203,10 @@ def SSD300(input_shape, num_classes=21):
                                    name='conv8_2')(net['conv8_1'])
     # Last Pool
     net['pool6'] = GlobalAveragePooling2D(name='pool6')(net['conv8_2'])
-    # Prediction from conv4_6 (still called conv4_3 in the remainder)
-    net['conv4_3_norm'] = Normalize(20, name='conv4_3_norm')(net['conv4_6'])
+
+    # Prediction from conv3_4 (still called conv4_3 in the remainder)
+    # Will clean this up after training tests
+    net['conv4_3_norm'] = Normalize(20, name='conv4_3_norm')(net['conv3_4'])
     num_priors = 3
     x = Convolution2D(num_priors * 4, 3, 3, border_mode='same',
                       name='conv4_3_norm_mbox_loc')(net['conv4_3_norm'])
@@ -223,11 +225,12 @@ def SSD300(input_shape, num_classes=21):
                         variances=[0.1, 0.1, 0.2, 0.2],
                         name='conv4_3_norm_mbox_priorbox')
     net['conv4_3_norm_mbox_priorbox'] = priorbox(net['conv4_3_norm'])
-    # Prediction from fc7
+
+    # Prediction from conv4_6 -- again, will replace after train test
     num_priors = 6
     net['fc7_mbox_loc'] = Convolution2D(num_priors * 4, 3, 3,
                                         border_mode='same',
-                                        name='fc7_mbox_loc')(net['fc7'])
+                                        name='fc7_mbox_loc')(net['conv4_6'])
     flatten = Flatten(name='fc7_mbox_loc_flat')
     net['fc7_mbox_loc_flat'] = flatten(net['fc7_mbox_loc'])
     name = 'fc7_mbox_conf'
@@ -242,10 +245,14 @@ def SSD300(input_shape, num_classes=21):
                         variances=[0.1, 0.1, 0.2, 0.2],
                         name='fc7_mbox_priorbox')
     net['fc7_mbox_priorbox'] = priorbox(net['fc7'])
-    # Prediction from conv6_2
+
+    # Prediction from this fc7 (it will still be called 6_2)
+
+    net['fc7_mbox_pre'] = Convolution2D(512, 1, 1, activation='relu',
+                               border_mode='same', name='fc7_mbox_pre')(net['fc7'])
     num_priors = 6
     x = Convolution2D(num_priors * 4, 3, 3, border_mode='same',
-                      name='conv6_2_mbox_loc')(net['conv6_2'])
+                      name='conv6_2_mbox_loc')(net['fc7_mbox_pre'])
     net['conv6_2_mbox_loc'] = x
     flatten = Flatten(name='conv6_2_mbox_loc_flat')
     net['conv6_2_mbox_loc_flat'] = flatten(net['conv6_2_mbox_loc'])

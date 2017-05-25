@@ -10,7 +10,7 @@ The basic algorithm is [SSD (*Single Shot Detection*)](http://arxiv.org/abs/1512
 * `pip install matplotlib`
 * `pip install keras==1.2.2` the version that this SSD was written to handle
 * `pip install h5py` for the initialization/pretrained weights 
-* Speaking of weights, download pretrained VGG-16 weights at [mega.nz](https://mega.nz/#F!7RowVLCL!q3cEVRK9jyOSB9el3SssIA) and ResNet weights at [fchollet's github](https://github.com/fchollet/deep-learning-models/releases/tag/v0.1) and put it in the main directory. It is recommended to train the new ResNet version of SSD with those weights, as it will help transfer learning (the wave of the future, according to Andrew Ng)
+* Speaking of weights, download pretrained VGG-16 and ResNet weights at [fchollet's github](https://github.com/fchollet/deep-learning-models/releases/tag/v0.1) (look for the files with `ordering_tf` in their name, and `notop`) and put them in the main directory. 
 * `pip install pillow` scipy will not function without it
 * `pip install opencv-python` (don’t forget the -python)
 

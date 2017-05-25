@@ -142,28 +142,28 @@ def SSD300(input_shape, num_classes=21):
     net['pool1'] = MaxPooling2D((3, 3), strides=(2, 2))(x)
 
     # Block 2
-    net['conv2_1'] = conv_block(net['pool1'], 3, [64, 64, 256], stage=2, block='1', strides=(1, 1))
-    net['conv2_2'] = identity_block(net['conv2_1'], 3, [64, 64, 256], stage=2, block='2')
-    net['conv2_3'] = identity_block(net['conv2_2'], 3, [64, 64, 256], stage=2, block='3')
+    net['conv2_1'] = conv_block(net['pool1'], 3, [64, 64, 256], stage=2, block='a', strides=(1, 1))
+    net['conv2_2'] = identity_block(net['conv2_1'], 3, [64, 64, 256], stage=2, block='b')
+    net['conv2_3'] = identity_block(net['conv2_2'], 3, [64, 64, 256], stage=2, block='c')
 
     # Block 3
-    net['conv3_1'] = conv_block(net['conv2_3'], 3, [128, 128, 512], stage=3, block='1')
-    net['conv3_2'] = identity_block(net['conv3_1'] , 3, [128, 128, 512], stage=3, block='2')
-    net['conv3_3'] = identity_block(net['conv3_2'], 3, [128, 128, 512], stage=3, block='3')
-    net['conv3_4'] = identity_block(net['conv3_3'], 3, [128, 128, 512], stage=3, block='4')
+    net['conv3_1'] = conv_block(net['conv2_3'], 3, [128, 128, 512], stage=3, block='a')
+    net['conv3_2'] = identity_block(net['conv3_1'] , 3, [128, 128, 512], stage=3, block='b')
+    net['conv3_3'] = identity_block(net['conv3_2'], 3, [128, 128, 512], stage=3, block='c')
+    net['conv3_4'] = identity_block(net['conv3_3'], 3, [128, 128, 512], stage=3, block='d')
 
     # Block 4
-    net['conv4_1'] = conv_block(net['conv3_4'], 3, [256, 256, 1024], stage=4, block='1')
-    net['conv4_2'] = identity_block(net['conv4_1'], 3, [256, 256, 1024], stage=4, block='2')
-    net['conv4_3'] = identity_block(net['conv4_2'], 3, [256, 256, 1024], stage=4, block='3')
-    net['conv4_4'] = identity_block(net['conv4_3'], 3, [256, 256, 1024], stage=4, block='4')
-    net['conv4_5'] = identity_block(net['conv4_4'], 3, [256, 256, 1024], stage=4, block='5')
-    net['conv4_6'] = identity_block(net['conv4_5'], 3, [256, 256, 1024], stage=4, block='6')
+    net['conv4_1'] = conv_block(net['conv3_4'], 3, [256, 256, 1024], stage=4, block='a')
+    net['conv4_2'] = identity_block(net['conv4_1'], 3, [256, 256, 1024], stage=4, block='b')
+    net['conv4_3'] = identity_block(net['conv4_2'], 3, [256, 256, 1024], stage=4, block='c')
+    net['conv4_4'] = identity_block(net['conv4_3'], 3, [256, 256, 1024], stage=4, block='d')
+    net['conv4_5'] = identity_block(net['conv4_4'], 3, [256, 256, 1024], stage=4, block='e')
+    net['conv4_6'] = identity_block(net['conv4_5'], 3, [256, 256, 1024], stage=4, block='f')
 
     # Block 5
-    net['conv5_1']  = conv_block(net['conv4_6'], 3, [512, 512, 2048], stage=5, block='1')
-    net['conv5_2'] = identity_block(net['conv5_1'], 3, [512, 512, 2048], stage=5, block='2')
-    net['conv5_3'] = identity_block(net['conv5_2'], 3, [512, 512, 2048], stage=5, block='3')
+    net['conv5_1']  = conv_block(net['conv4_6'], 3, [512, 512, 2048], stage=5, block='a')
+    net['conv5_2'] = identity_block(net['conv5_1'], 3, [512, 512, 2048], stage=5, block='b')
+    net['conv5_3'] = identity_block(net['conv5_2'], 3, [512, 512, 2048], stage=5, block='c')
 
     #net['pool5'] = AveragePooling2D((7, 7), name='pool5')(net['conv5_3'])
 

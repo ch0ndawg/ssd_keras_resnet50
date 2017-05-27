@@ -166,6 +166,10 @@ def SSD300(input_shape, num_classes=21):
     net['conv5_3'] = identity_block(net['conv5_2'], 3, [512, 512, 2048], stage=5, block='c')
 
     #net['pool5'] = AveragePooling2D((7, 7), name='pool5')(net['conv5_3'])
+    # resnet uses this map directly onto the classification (top layer)
+    # we will use the VGG pooling instead, which provides an appropriately sized input to fc6
+    net['pool5v'] = MaxPooling2D((3, 3), strides=(1, 1), border_mode='same',
+                            name='pool5v')(net['conv5_3'])
 
 
 ## END ResNet50
@@ -174,7 +178,7 @@ def SSD300(input_shape, num_classes=21):
     # FC6
     net['fc6'] = AtrousConvolution2D(1024, 3, 3, atrous_rate=(6, 6),
                                      activation='relu', border_mode='same',
-                                     name='fc6')(net['conv5_3'])
+                                     name='fc6')(net['pool5v'])
     # x = Dropout(0.5, name='drop6')(x)
     # FC7
     net['fc7'] = Convolution2D(1024, 1, 1, activation='relu',
